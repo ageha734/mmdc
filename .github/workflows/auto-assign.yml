@@ -1,0 +1,80 @@
+name: "Auto Assign"
+
+on:
+  pull_request:
+    types: [opened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  auto-assign:
+    name: Auto Assign Reviewers
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Calculate PR size
+        id: size
+        run: |
+          BASE_REF="${{ github.event.pull_request.base.sha }}"
+          HEAD_REF="${{ github.event.pull_request.head.sha }}"
+
+          STATS=$(git diff --shortstat $BASE_REF $HEAD_REF)
+          ADDITIONS=$(echo "$STATS" | grep -oE '[0-9]+ insertion' | grep -oE '[0-9]+' || echo "0")
+          DELETIONS=$(echo "$STATS" | grep -oE '[0-9]+ deletion' | grep -oE '[0-9]+' || echo "0")
+          TOTAL=$((ADDITIONS + DELETIONS))
+
+          echo "total=$TOTAL" >> $GITHUB_OUTPUT
+
+          if [ "$TOTAL" -le 99 ]; then
+            echo "size=small" >> $GITHUB_OUTPUT
+          else
+            echo "size=large" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check for skip labels
+        id: skip
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          script: |
+            const skipLabels = ['skip-review', 'wip', 'do-not-merge'];
+            const { data: labels } = await github.rest.issues.listLabelsOnIssue({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+
+            const hasSkipLabel = labels.some(label => skipLabels.includes(label.name));
+            return hasSkipLabel;
+          result-encoding: string
+
+      - name: Assign reviewers
+        if: steps.skip.outputs.result == 'false'
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          script: |
+            const size = '${{ steps.size.outputs.size }}';
+            const author = context.payload.pull_request.user.login;
+
+            if (author.includes('[bot]')) {
+              console.log('Skipping bot PR');
+              return;
+            }
+
+            const reviewers = ['ageha734'].filter(r => r !== author);
+
+            if (reviewers.length > 0) {
+              await github.rest.pulls.requestReviewers({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.issue.number,
+                reviewers: reviewers.slice(0, 1)
+              });
+              console.log(`Assigned reviewers: ${reviewers.slice(0, 1).join(', ')}`);
+            }

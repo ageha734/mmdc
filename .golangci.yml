@@ -1,0 +1,92 @@
+version: "2"
+
+run:
+  timeout: 5m
+  tests: false
+
+linters:
+  enable:
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - bodyclose
+    - dupl
+    - errname
+    - errorlint
+    - exhaustive
+    - gocognit
+    - goconst
+    - gocritic
+    - gocyclo
+    - godot
+    - gosec
+    - misspell
+    - nakedret
+    - nestif
+    - nilerr
+    - noctx
+    - unconvert
+    - unparam
+    - wastedassign
+    - whitespace
+
+  settings:
+    dupl:
+      threshold: 200
+    errcheck:
+      check-type-assertions: true
+    gocognit:
+      min-complexity: 35
+    goconst:
+      min-len: 3
+      min-occurrences: 3
+    gocyclo:
+      min-complexity: 20
+    misspell:
+      locale: US
+    nakedret:
+      max-func-lines: 30
+    nestif:
+      min-complexity: 4
+
+issues:
+  max-issues-per-linter: 50
+  max-same-issues: 10
+  exclude-rules:
+    - path: ".*_test\\.go"
+      linters:
+        - dupl
+        - errcheck
+        - goconst
+        - gosec
+        - revive
+        - gocognit
+        - gocritic
+    - path: "test/"
+      linters:
+        - dupl
+        - errcheck
+        - goconst
+        - gosec
+        - revive
+        - gocognit
+        - gocritic
+    - path: "scripts/"
+      linters:
+        - revive
+        - gocognit
+        - errcheck
+    - linters:
+        - misspell
+      text: "artefacts"
+    - linters:
+        - misspell
+      text: "Artefacts"
+    - linters:
+        - misspell
+      text: "cancelled"
+    - linters:
+        - gosec
+      text: "G304"

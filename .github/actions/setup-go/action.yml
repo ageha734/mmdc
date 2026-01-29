@@ -1,0 +1,45 @@
+name: "Setup Go and Task"
+description: "Setup Go environment with Taskfile"
+
+inputs:
+  install-chrome:
+    description: "Install Chrome browser for E2E/Integration tests"
+    required: false
+    default: "false"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Go
+      uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
+      with:
+        go-version-file: "go.mod"
+        cache: true
+
+    - name: Install Task
+      uses: arduino/setup-task@b91d5d2c96a56797b48ac1e0e89220bf64044611 # v2.0.0
+      with:
+        version: 3.x
+
+    - name: Install dependencies
+      shell: bash
+      run: task deps
+
+    - name: Install Chrome (Ubuntu)
+      if: inputs.install-chrome == 'true' && runner.os == 'Linux'
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y chromium-browser || sudo apt-get install -y google-chrome-stable || true
+
+    - name: Install Chrome (macOS)
+      if: inputs.install-chrome == 'true' && runner.os == 'macOS'
+      shell: bash
+      run: |
+        brew install --cask google-chrome || true
+
+    - name: Install Chrome (Windows)
+      if: inputs.install-chrome == 'true' && runner.os == 'Windows'
+      shell: powershell
+      run: |
+        choco install googlechrome -y --no-progress

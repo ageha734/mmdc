@@ -1,0 +1,32 @@
+# CODEOWNERS file
+# These owners will be automatically requested for review
+# when someone opens a pull request that modifies code that they own.
+#
+# The last matching pattern takes precedence.
+
+# Default owner for everything
+* @ageha734
+
+# Test files
+test/** @ageha734
+
+# CI/CD configuration
+.github/** @ageha734
+
+# Core application code
+cmd/** @ageha734
+config/** @ageha734
+domain/** @ageha734
+handler/** @ageha734
+infra/** @ageha734
+pkg/** @ageha734
+usecase/** @ageha734
+
+# Documentation
+*.md @ageha734
+docs/** @ageha734
+
+# Configuration files
+*.yml @ageha734
+*.yaml @ageha734
+*.json @ageha734

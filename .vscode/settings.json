@@ -1,0 +1,148 @@
+{
+  "[go.mod]": {
+    "editor.defaultFormatter": "golang.go",
+    "editor.formatOnSave": true
+  },
+  "[go.sum]": {
+    "editor.formatOnSave": false
+  },
+  "[go]": {
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    },
+    "editor.defaultFormatter": "golang.go",
+    "editor.formatOnSave": true
+  },
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features",
+    "editor.formatOnSave": true,
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2
+  },
+  "[markdown]": {
+    "editor.formatOnSave": true,
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2,
+    "editor.wordWrap": "on"
+  },
+  "[yaml]": {
+    "editor.defaultFormatter": "redhat.vscode-yaml",
+    "editor.formatOnSave": true,
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2
+  },
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit"
+  },
+  "editor.formatOnSave": true,
+  "errorLens.enabled": true,
+  "errorLens.enabledDiagnosticLevels": [
+    "error",
+    "warning"
+  ],
+  "errorLens.followCursor": "activeLine",
+  "errorLens.gutterIconsEnabled": true,
+  "files.exclude": {
+    "**/*.out": true,
+    "**/*.test": true,
+    "**/.DS_Store": true,
+    "**/.git": true,
+    "**/chrome-user-data-*": true,
+    "**/coverage.html": true,
+    "**/coverage.txt": true,
+    "**/node_modules": true
+  },
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+  "files.trimTrailingWhitespace": true,
+  "files.watcherExclude": {
+    "**/*.out": true,
+    "**/*.test": true,
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/bin/**": true,
+    "**/build/**": true,
+    "**/chrome-user-data-*/**": true,
+    "**/dist/**": true,
+    "**/node_modules/**": true,
+    "**/vendor/**": true
+  },
+  "go-arch-lint.configPath": ".go-arch-lint.yml",
+  "go-arch-lint.enabled": true,
+  "go.alternateTools": {
+    "go": "go"
+  },
+  "go.buildTags": "integration",
+  "go.coverOnSave": false,
+  "go.formatTool": "goimports",
+  "go.lintOnSave": "workspace",
+  "go.lintTool": "golangci-lint",
+  "go.testEnvVars": {},
+  "go.testFlags": [
+    "-v",
+    "-count=1"
+  ],
+  "go.testTags": "integration",
+  "go.testTimeout": "5m",
+  "go.useLanguageServer": true,
+  "golangci-lint.args": [
+    "--timeout=5m",
+    "--config=.golangci.yml"
+  ],
+  "golangci-lint.enable": true,
+  "golangci-lint.lintOnSave": true,
+  "golangci-lint.lintTool": "golangci-lint",
+  "golangci-lint.outputPanel": "replace",
+  "golangci-lint.run": "onSave",
+  "golangci-lint.showErrorMessages": true,
+  "gopls": {
+    "analyses": {
+      "fieldalignment": false,
+      "shadow": true,
+      "unusedparams": true
+    },
+    "buildFlags": [
+      "-tags=integration"
+    ],
+    "codelenses": {
+      "gc_details": false,
+      "test": true,
+      "tidy": true,
+      "upgrade_dependency": true
+    },
+    "completeUnimported": true,
+    "matcher": "fuzzy",
+    "staticcheck": true,
+    "usePlaceholders": true
+  },
+  "markdown.extension.print.absoluteImgPath": false,
+  "markdown.extension.toc.updateOnSave": true,
+  "markdown.preview.breaks": true,
+  "markdown.preview.linkify": true,
+  "markdownlint.config": {
+    "MD013": false,
+    "MD033": false,
+    "MD041": false,
+    "default": true
+  },
+  "markdownlint.focusMode": false,
+  "search.exclude": {
+    "**/*.out": true,
+    "**/*.test": true,
+    "**/.git": true,
+    "**/bin": true,
+    "**/build": true,
+    "**/chrome-user-data-*": true,
+    "**/coverage.html": true,
+    "**/coverage.txt": true,
+    "**/dist": true,
+    "**/node_modules": true,
+    "**/vendor": true
+  },
+  "yaml.completion": true,
+  "yaml.format.bracketSpacing": true,
+  "yaml.format.enable": true,
+  "yaml.format.singleQuote": false,
+  "yaml.hover": true,
+  "yaml.validate": true
+}

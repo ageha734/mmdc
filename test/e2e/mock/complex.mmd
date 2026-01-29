@@ -1,0 +1,19 @@
+flowchart TB
+    subgraph IDE1[IDE]
+        direction TB
+        subgraph SDK[SDK]
+            A[Browser] --> B[Server]
+            B --> C{Decision}
+            C -->|Yes| D[Action 1]
+            C -->|No| E[Action 2]
+        end
+        F[External] --> SDK
+    end
+    subgraph Cloud[Cloud Services]
+        G[API Gateway] --> H[Lambda]
+        H --> I[Database]
+    end
+    IDE1 --> Cloud
+
+    style A fill:#f9f,stroke:#333,stroke-width:4px
+    style Cloud fill:#bbf,stroke:#333,stroke-width:2px

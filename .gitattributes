@@ -1,0 +1,55 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Go files
+*.go text eol=lf diff=go
+
+# Shell scripts
+*.sh text eol=lf
+*.bash text eol=lf
+
+# PowerShell scripts
+*.ps1 text eol=crlf
+*.psm1 text eol=crlf
+
+# Configuration files
+*.yml text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+*.toml text eol=lf
+
+# Documentation
+*.md text eol=lf diff=markdown
+*.txt text eol=lf
+
+# GitHub templates
+.github/**/*.md text eol=lf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.svg binary
+
+# Archives
+*.zip binary
+*.tar binary
+*.gz binary
+*.tar.gz binary
+
+# Go binaries and dependencies
+/vendor/** -diff linguist-vendored
+*.exe binary
+
+# Test fixtures
+test/e2e/mock/*.mmd text eol=lf
+test/e2e/mock/*.md text eol=lf
+test/e2e/mock/*.css text eol=lf
+test/e2e/mock/*.json text eol=lf
+
+# Ignore generated files in linguist stats
+coverage.out linguist-generated
+*.html linguist-generated

@@ -1,0 +1,176 @@
+version: 2
+
+project_name: mmdc
+
+before:
+  hooks:
+    - go mod tidy
+    - go generate ./...
+
+builds:
+  - id: mmdc
+    main: ./cmd
+    binary: mmdc
+    ldflags: -s -w -X main.version={{.Version}} -X main.commit={{.ShortCommit}} -X main.date={{.Date}}
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - windows
+      - linux
+      - freebsd
+      - netbsd
+      - illumos
+    goarch:
+      - amd64
+      - arm64
+      - arm
+      - 386
+      - ppc64le
+      - s390x
+      - mips64
+      - mips64le
+      - riscv64
+      - loong64
+    goarm:
+      - 6
+      - 7
+    gomips:
+      - hardfloat
+    ignore:
+      - goos: darwin
+        goarch: 386
+      - goos: windows
+        goarch: arm
+
+archives:
+  - formats: ["tar.gz"]
+    wrap_in_directory: true
+    format_overrides:
+      - goos: windows
+        formats: ["zip"]
+    name_template: "{{ .ProjectName }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
+    files:
+      - .github/LICENSE*
+      - .github/README*
+      - CHANGELOG*
+
+snapshot:
+  version_template: SNAPSHOT-{{ .Commit }}
+
+checksum:
+  name_template: "checksums.txt"
+  algorithm: sha256
+
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+      - "^ci:"
+      - Merge pull request
+      - Merge branch
+  groups:
+    - title: "New Features"
+      regexp: '^feat(\(.+\))?!?:'
+      order: 0
+    - title: "Bug Fixes"
+      regexp: '^fix(\(.+\))?!?:'
+      order: 1
+    - title: "Performance Improvements"
+      regexp: '^perf(\(.+\))?!?:'
+      order: 2
+    - title: "Refactoring"
+      regexp: '^refactor(\(.+\))?!?:'
+      order: 3
+    - title: "Other"
+      order: 999
+
+release:
+  github:
+    owner: ageha734
+    name: mmdc
+  draft: false
+  prerelease: auto
+  mode: replace
+  header: |
+    ## mmdc {{ .Tag }}
+
+    {{ .Date }}
+  footer: |
+    ---
+
+    **Full Changelog**: https://github.com/ageha734/mmdc/compare/{{ .PreviousTag }}...{{ .Tag }}
+
+    ### Installation
+
+    ```bash
+    # Using Go
+    go install github.com/ageha734/mmdc/cmd@{{ .Tag }}
+
+    # Using Homebrew
+    brew tap ageha734/mmdc && brew install mmdc
+
+    # Using curl
+    curl -fsSL https://raw.githubusercontent.com/ageha734/mmdc/master/install.sh | bash
+    ```
+
+brews:
+  - repository:
+      owner: ageha734
+      name: homebrew-mmdc
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    directory: Formula
+    homepage: "https://github.com/ageha734/mmdc"
+    description: "Go-based CLI for rendering Mermaid diagrams to SVG, PNG, and PDF"
+    license: "MIT"
+    test: |
+      system "#{bin}/mmdc", "--version"
+    dependencies:
+      - name: chromium
+        type: optional
+
+nfpms:
+  - id: packages
+    package_name: mmdc
+    vendor: ageha734
+    homepage: "https://github.com/ageha734/mmdc"
+    maintainer: "ageha734 <ageha734@users.noreply.github.com>"
+    description: "Go-based CLI for rendering Mermaid diagrams to SVG, PNG, and PDF"
+    license: MIT
+    formats:
+      - deb
+      - rpm
+      - apk
+    dependencies:
+      - chromium
+    recommends:
+      - chromium-browser
+    bindir: /usr/bin
+    contents:
+      - src: ./.github/LICENSE.md
+        dst: /usr/share/doc/mmdc/LICENSE
+      - src: ./.github/README.md
+        dst: /usr/share/doc/mmdc/README.md
+
+sboms:
+  - artifacts: archive
+
+signs:
+  - cmd: cosign
+    signature: "${artifact}.sig"
+    certificate: "${artifact}.pem"
+    args:
+      - sign-blob
+      - "--output-signature=${signature}"
+      - "--output-certificate=${certificate}"
+      - "${artifact}"
+      - --yes
+    artifacts: checksum
+    output: true
+
+announce:
+  skip: true

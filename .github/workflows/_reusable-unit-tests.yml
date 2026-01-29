@@ -1,0 +1,62 @@
+name: "Reusable: Unit Tests"
+
+on:
+  workflow_call:
+
+jobs:
+  unit-tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            goarch: amd64
+          - os: ubuntu-latest
+            goarch: arm64
+          - os: macos-latest
+            goarch: amd64
+          - os: macos-latest
+            goarch: arm64
+          - os: windows-latest
+            goarch: amd64
+          - os: windows-latest
+            goarch: arm64
+
+    runs-on: ${{ matrix.os }}
+    env:
+      GOARCH: ${{ matrix.goarch }}
+
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Setup Go and Task
+        uses: ./.github/actions/setup-go
+
+      - name: Run unit tests
+        run: task test 2>&1 | tee test-output.txt
+        shell: bash
+
+      - name: Generate JUnit report
+        if: always()
+        run: |
+          go install github.com/jstemmer/go-junit-report/v2@latest
+          cat test-output.txt | go-junit-report -set-exit-code > test-report.xml
+        shell: bash
+        continue-on-error: true
+
+      - name: Upload coverage
+        if: matrix.os == 'ubuntu-latest' && matrix.goarch == 'amd64'
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
+        with:
+          files: coverage.out
+          flags: unittests
+          fail_ci_if_error: false
+
+      - name: Publish Test Report
+        uses: dorny/test-reporter@b082adf0eced0765477756c2a610396589b8c637 # v2.5.0
+        if: always() && (success() || failure())
+        with:
+          name: "Unit Tests (${{ matrix.os }}-${{ matrix.goarch }})"
+          path: test-report.xml
+          reporter: java-junit
+          fail-on-error: false

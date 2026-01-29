@@ -1,0 +1,68 @@
+test:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "test/**"
+          - "**/*_test.go"
+
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "*.md"
+          - "docs/**"
+          - ".chglog/**"
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".github/**"
+          - ".goreleaser.yml"
+
+config:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "*.yml"
+          - "*.yaml"
+          - "*.json"
+          - ".golangci.yml"
+          - ".go-arch-lint.yml"
+
+core:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "cmd/**"
+          - "config/**"
+          - "domain/**"
+          - "handler/**"
+          - "infra/**"
+          - "pkg/**"
+          - "usecase/**"
+
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "go.mod"
+          - "go.sum"
+
+renderer:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "infra/renderer/**"
+
+file-io:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "infra/file/**"
+          - "handler/file.go"
+
+domain:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "domain/**"
+          - "usecase/**"
+
+scripts:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "scripts/**"
+          - "install.sh"
+          - "install.ps1"

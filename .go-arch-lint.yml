@@ -1,0 +1,87 @@
+version: 3
+
+allow:
+  depOnAnyVendor: true
+
+excludeFiles:
+  - "^.*_test\\.go$"
+  - "^.*/test/.*$"
+  - "^.*/scripts/.*$"
+
+components:
+  cmd:
+    in: cmd
+
+  domain:
+    in: domain
+
+  config:
+    in: config
+
+  handler:
+    in: handler
+
+  infra:
+    in: infra/**
+
+  usecase:
+    in: usecase
+
+  pkg:
+    in: pkg/**
+
+  test:
+    in: test
+
+deps:
+  cmd:
+    mayDependOn:
+      - config
+      - domain
+      - handler
+      - infra
+      - usecase
+      - pkg
+
+  usecase:
+    mayDependOn:
+      - domain
+      - config
+      - infra
+      - pkg
+
+  handler:
+    mayDependOn:
+      - domain
+      - config
+      - pkg
+
+  infra:
+    mayDependOn:
+      - domain
+      - config
+      - handler
+      - pkg
+
+  domain:
+    mayDependOn:
+      - pkg
+
+  config:
+    mayDependOn:
+      - pkg
+
+  pkg:
+    mayDependOn:
+      - domain
+    anyVendorDeps: true
+
+  test:
+    mayDependOn:
+      - cmd
+      - config
+      - domain
+      - handler
+      - infra
+      - usecase
+      - pkg

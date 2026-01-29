@@ -1,0 +1,119 @@
+name-template: "v$RESOLVED_VERSION"
+tag-template: "v$RESOLVED_VERSION"
+
+categories:
+  - title: "Features"
+    labels:
+      - "feature"
+      - "enhancement"
+      - "feat"
+  - title: "Bug Fixes"
+    labels:
+      - "fix"
+      - "bugfix"
+      - "bug"
+  - title: "Performance Improvements"
+    labels:
+      - "performance"
+      - "perf"
+  - title: "Code Refactoring"
+    labels:
+      - "refactor"
+      - "refactoring"
+  - title: "Documentation"
+    labels:
+      - "documentation"
+      - "docs"
+  - title: "Tests"
+    labels:
+      - "test"
+      - "tests"
+      - "testing"
+  - title: "CI/CD"
+    labels:
+      - "ci"
+      - "cd"
+      - "github-actions"
+  - title: "Dependencies"
+    labels:
+      - "dependencies"
+      - "deps"
+  - title: "Other Changes"
+    labels:
+      - "chore"
+      - "*"
+
+change-template: "- $TITLE @$AUTHOR (#$NUMBER)"
+change-title-escapes: '\<*_&'
+
+version-resolver:
+  major:
+    labels:
+      - "major"
+      - "breaking"
+      - "breaking-change"
+  minor:
+    labels:
+      - "minor"
+      - "feature"
+      - "enhancement"
+      - "feat"
+  patch:
+    labels:
+      - "patch"
+      - "fix"
+      - "bugfix"
+      - "bug"
+  default: patch
+
+autolabeler:
+  - label: "feature"
+    title:
+      - "/^feat(\\(.+\\))?:/i"
+      - "/^feature(\\(.+\\))?:/i"
+  - label: "fix"
+    title:
+      - "/^fix(\\(.+\\))?:/i"
+      - "/^bugfix(\\(.+\\))?:/i"
+  - label: "documentation"
+    title:
+      - "/^docs(\\(.+\\))?:/i"
+    files:
+      - "*.md"
+      - "docs/**"
+  - label: "test"
+    title:
+      - "/^test(\\(.+\\))?:/i"
+    files:
+      - "test/**"
+      - "**/*_test.go"
+  - label: "ci"
+    title:
+      - "/^ci(\\(.+\\))?:/i"
+    files:
+      - ".github/**"
+  - label: "refactor"
+    title:
+      - "/^refactor(\\(.+\\))?:/i"
+  - label: "performance"
+    title:
+      - "/^perf(\\(.+\\))?:/i"
+  - label: "dependencies"
+    files:
+      - "go.mod"
+      - "go.sum"
+
+exclude-labels:
+  - "skip-changelog"
+  - "release"
+
+exclude-contributors:
+  - "dependabot[bot]"
+  - "renovate[bot]"
+
+template: |
+  ## What's Changed
+
+  $CHANGES
+
+  **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION

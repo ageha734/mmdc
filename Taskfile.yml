@@ -1,0 +1,258 @@
+version: "3"
+
+vars:
+  BINARY_NAME: mmdc
+  MAIN_PACKAGE: ./cmd
+  LDFLAGS: -s -w
+  TEST_TIMEOUT: 5m
+  COVERAGE_OUT: coverage.out
+  COVERAGE_HTML: coverage.html
+  PLATFORMS:
+    - linux/amd64
+    - linux/arm64
+    - darwin/amd64
+    - darwin/arm64
+    - windows/amd64
+    - windows/arm64
+
+env:
+  CGO_ENABLED: "0"
+
+tasks:
+  default:
+    desc: Build and test
+    aliases: [all]
+    deps: [build, test]
+
+  build:
+    desc: Build binary
+    aliases: [b]
+    sources:
+      - "**/*.go"
+      - go.mod
+      - go.sum
+    generates:
+      - "{{.BINARY_NAME}}"
+    cmds:
+      - go build -v -ldflags="{{.LDFLAGS}}" -o {{.BINARY_NAME}} {{.MAIN_PACKAGE}}
+
+  build:debug:
+    desc: Debug build (with symbol information)
+    cmds:
+      - go build -v -o {{.BINARY_NAME}} {{.MAIN_PACKAGE}}
+
+  build:all:
+    desc: Build for all platforms
+    aliases: [ba]
+    deps:
+      - for: { var: PLATFORMS }
+        task: build:platform
+        vars:
+          PLATFORM: "{{.ITEM}}"
+
+  build:platform:
+    internal: true
+    label: "build:{{.PLATFORM}}"
+    vars:
+      GOOS: '{{index (splitList "/" .PLATFORM) 0}}'
+      GOARCH: '{{index (splitList "/" .PLATFORM) 1}}'
+      EXT: '{{if eq .GOOS "windows"}}.exe{{end}}'
+      OUTPUT: "{{$.BINARY_NAME}}-{{.GOOS}}-{{.GOARCH}}{{.EXT}}"
+    generates:
+      - "{{.OUTPUT}}"
+    env:
+      GOOS: "{{.GOOS}}"
+      GOARCH: "{{.GOARCH}}"
+    cmds:
+      - go build -v -ldflags="{{.LDFLAGS}}" -o {{.OUTPUT}} {{.MAIN_PACKAGE}}
+
+  install:
+    desc: Install binary to GOPATH/bin
+    aliases: [i]
+    cmds:
+      - go install {{.MAIN_PACKAGE}}
+
+  test:
+    desc: Run unit tests
+    aliases: [t]
+    cmds:
+      - go test -v -race -count=1 -timeout={{.TEST_TIMEOUT}} -coverprofile={{.COVERAGE_OUT}} -covermode=atomic $(go list ./... | grep -v /test/)
+
+  test:short:
+    desc: Quick test (without race detection)
+    aliases: [ts]
+    cmds:
+      - go test -v -count=1 -timeout={{.TEST_TIMEOUT}} $(go list ./... | grep -v /test/)
+
+  integration:
+    desc: Run integration tests
+    aliases: [ti]
+    env:
+      CHROMEDP_NO_SANDBOX: "true"
+    cmds:
+      - go test -v -tags=integration -race -count=1 -timeout={{.TEST_TIMEOUT}} -coverprofile=coverage-integration.out -covermode=atomic ./test/integration/...
+
+  e2e:
+    desc: Run E2E tests (requires build)
+    aliases: [te]
+    deps: [build]
+    env:
+      CHROMEDP_NO_SANDBOX: "true"
+    cmds:
+      - go test -v -race -count=1 -timeout={{.TEST_TIMEOUT}} -coverprofile=coverage-e2e.out -covermode=atomic ./test/e2e/...
+
+  test:all:
+    desc: Run all tests
+    aliases: [ta]
+    deps: [test, integration, e2e]
+
+  coverage:
+    desc: Generate coverage report
+    aliases: [co]
+    deps: [test]
+    generates:
+      - "{{.COVERAGE_HTML}}"
+    cmds:
+      - go tool cover -html={{.COVERAGE_OUT}} -o {{.COVERAGE_HTML}}
+
+  coverage:all:
+    desc: Generate combined coverage report
+    aliases: [tca]
+    deps:
+      - task: _coverage:run
+        vars: { TYPE: unit, TAGS: "", PATH: "./..." }
+      - task: _coverage:run
+        vars:
+          {
+            TYPE: integration,
+            TAGS: integration,
+            PATH: "./test/integration/...",
+          }
+      - task: _coverage:run
+        vars: { TYPE: e2e, TAGS: "", PATH: "./test/e2e/..." }
+    cmds:
+      - task: _coverage:merge
+
+  _coverage:run:
+    internal: true
+    label: "coverage:{{.TYPE}}"
+    vars:
+      TAGS_FLAG: "{{if .TAGS}}-tags={{.TAGS}}{{end}}"
+    cmds:
+      - cmd: go test -v {{.TAGS_FLAG}} -race -count=1 -coverprofile=coverage-{{.TYPE}}.out -covermode=atomic {{.PATH}}
+        ignore_error: true
+
+  _coverage:merge:
+    internal: true
+    vars:
+      COVERAGE_FILES:
+        - coverage-unit.out
+        - coverage-integration.out
+        - coverage-e2e.out
+    generates:
+      - coverage-all.out
+      - coverage-all.html
+    cmds:
+      - go run scripts/merge-coverage.go {{.COVERAGE_FILES | join " "}}
+      - go tool cover -html=coverage-all.out -o coverage-all.html
+
+  arch:
+    desc: Run go-arch-lint
+    aliases: [la]
+    preconditions:
+      - sh: test -f .go-arch-lint.yml
+        msg: ".go-arch-lint.yml not found"
+    cmds:
+      - go run github.com/fe3dback/go-arch-lint@v1.14.0 check --arch-file .go-arch-lint.yml
+
+  lint:
+    desc: Run golangci-lint
+    aliases: [l]
+    cmds:
+      - go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.8.0 run --timeout={{.TEST_TIMEOUT}} --config=.golangci.yml
+
+  lint:fix:
+    desc: Run golangci-lint with auto-fix
+    aliases: [lf]
+    cmds:
+      - go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.8.0 run --timeout={{.TEST_TIMEOUT}} --config=.golangci.yml --fix
+
+  fmt:
+    desc: Format code
+    aliases: [f]
+    cmds:
+      - gofmt -s -w .
+      - go run golang.org/x/tools/cmd/goimports@v0.41.0  -w .
+
+  fmt:check:
+    desc: Check formatting (without fixing)
+    aliases: [fc]
+    vars:
+      GOFMT_FILES:
+        sh: gofmt -s -l .
+      GOIMPORTS_FILES:
+        sh: go run golang.org/x/tools/cmd/goimports@v0.41.0 -l .
+    preconditions:
+      - sh: test -z "{{.GOFMT_FILES}}"
+        msg: "Formatting errors found in:\n{{.GOFMT_FILES}}"
+      - sh: test -z "{{.GOIMPORTS_FILES}}"
+        msg: "Import errors found in:\n{{.GOIMPORTS_FILES}}"
+
+  deps:
+    desc: Download dependencies
+    aliases: [d]
+    cmds:
+      - go mod download
+
+  deps:tidy:
+    desc: Tidy go.mod
+    aliases: [dt]
+    cmds:
+      - go mod tidy
+
+  deps:update:
+    desc: Update dependencies
+    aliases: [du]
+    cmds:
+      - go get -u ./...
+      - task: deps:tidy
+
+  deps:verify:
+    desc: Verify dependencies
+    aliases: [dv]
+    cmds:
+      - go mod verify
+
+  clean:
+    desc: Remove build artifacts
+    aliases: [c]
+    cmds:
+      - for:
+          - "{{.BINARY_NAME}}"
+          - "{{.BINARY_NAME}}.exe"
+          - "{{.BINARY_NAME}}-*"
+          - "*.test"
+          - "*.out"
+          - "coverage*.html"
+          - "coverage*.txt"
+        cmd: git clean -xdf {{.ITEM}}
+      - git clean -xdf chrome-user-data-*
+
+  clean:all:
+    desc: Remove all artifacts
+    aliases: [ca]
+    deps: [clean]
+    cmds:
+      - for: [bin/, dist/, build/, testdata/output/]
+        cmd: git clean -xdf {{.ITEM}}
+
+  verify:
+    desc: Verify code (format, lint, test)
+    aliases: [v]
+    deps: [fmt:check, lint, arch, test, integration, e2e]
+
+  ci:
+    desc: CI tasks
+    cmds:
+      - task: deps:tidy
+      - task: verify

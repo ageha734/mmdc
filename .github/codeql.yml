@@ -1,0 +1,21 @@
+name: "CodeQL Configuration"
+
+paths:
+  - cmd
+  - config
+  - domain
+  - handler
+  - infra
+  - pkg
+  - usecase
+
+paths-ignore:
+  - test
+  - "**/*_test.go"
+
+queries:
+  - uses: security-extended
+  - uses: security-and-quality
+
+packs:
+  - codeql/go-queries

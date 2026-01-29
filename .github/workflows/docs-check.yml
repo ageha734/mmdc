@@ -1,0 +1,47 @@
+name: "Docs Check"
+
+on:
+  pull_request:
+    paths:
+      - "**.go"
+      - "!**_test.go"
+
+jobs:
+  docs-check:
+    name: Check Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Setup Go and Task
+        uses: ./.github/actions/setup-go
+
+      - name: Check for exported functions without docs
+        run: |
+          echo "## Documentation Check" > docs-report.md
+          echo "" >> docs-report.md
+
+          for pkg in cmd config domain handler infra/file infra/logger infra/renderer pkg/errors pkg/markdown pkg/path pkg/validation usecase; do
+            if [ -d "$pkg" ]; then
+              echo "### Package: $pkg" >> docs-report.md
+
+              UNDOCUMENTED=$(go doc -all ./$pkg 2>/dev/null | grep -E "^func [A-Z]|^type [A-Z]|^var [A-Z]|^const [A-Z]" | head -20 || true)
+
+              if [ -n "$UNDOCUMENTED" ]; then
+                echo '```' >> docs-report.md
+                echo "$UNDOCUMENTED" >> docs-report.md
+                echo '```' >> docs-report.md
+              else
+                echo "All exported identifiers are documented." >> docs-report.md
+              fi
+              echo "" >> docs-report.md
+            fi
+          done
+
+      - name: Upload docs report
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: docs-report
+          path: docs-report.md
+          retention-days: 7

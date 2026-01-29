@@ -1,0 +1,24 @@
+name: "CI (Push)"
+
+on:
+  push:
+    branches:
+      - master
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    uses: ./.github/workflows/_reusable-golangci-lint.yml
+  arch:
+    uses: ./.github/workflows/_reusable-go-arch-lint.yml
+  test:
+    uses: ./.github/workflows/_reusable-unit-tests.yml
+  integration:
+    uses: ./.github/workflows/_reusable-integration-tests.yml
+  e2e:
+    uses: ./.github/workflows/_reusable-e2e-tests.yml
+  build:
+    uses: ./.github/workflows/_reusable-build-tests.yml

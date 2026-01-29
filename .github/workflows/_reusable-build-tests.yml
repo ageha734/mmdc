@@ -1,0 +1,71 @@
+name: "Reusable: Build Tests"
+
+on:
+  workflow_call:
+
+jobs:
+  build-tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            goos: linux
+            goarch: amd64
+          - os: ubuntu-latest
+            goos: linux
+            goarch: arm64
+          - os: macos-latest
+            goos: darwin
+            goarch: amd64
+          - os: macos-latest
+            goos: darwin
+            goarch: arm64
+          - os: windows-latest
+            goos: windows
+            goarch: amd64
+          - os: windows-latest
+            goos: windows
+            goarch: arm64
+
+    runs-on: ${{ matrix.os }}
+    env:
+      GOOS: ${{ matrix.goos }}
+      GOARCH: ${{ matrix.goarch }}
+
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Setup Go and Task
+        uses: ./.github/actions/setup-go
+
+      - name: Build binary
+        run: task build
+        shell: bash
+
+      - name: Verify binary exists
+        run: |
+          ls -la mmdc* || dir mmdc*
+        shell: bash
+
+      - name: Test binary (Unix)
+        if: matrix.goos != 'windows' && matrix.goarch == 'amd64'
+        run: |
+          chmod +x mmdc
+          ./mmdc --version
+          ./mmdc --help
+        shell: bash
+
+      - name: Test binary (Windows)
+        if: matrix.goos == 'windows' && matrix.goarch == 'amd64'
+        run: |
+          ./mmdc.exe --version
+          ./mmdc.exe --help
+        shell: bash
+
+      - name: Upload binary artifact
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: mmdc-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: mmdc${{ matrix.goos == 'windows' && '.exe' || '' }}
+          retention-days: 7

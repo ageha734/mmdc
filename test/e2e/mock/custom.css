@@ -1,0 +1,40 @@
+.node rect {
+    fill: #f9f9f9 !important;
+    stroke: #333 !important;
+    stroke-width: 2px !important;
+}
+
+.node circle {
+    fill: #fff !important;
+    stroke: #333 !important;
+}
+
+.edgePath path {
+    stroke: #666 !important;
+    stroke-width: 2px !important;
+}
+
+.edgeLabel {
+    background-color: #fff !important;
+    color: #333 !important;
+}
+
+.cluster rect {
+    fill: #f0f0f0 !important;
+    stroke: #999 !important;
+}
+
+.actor {
+    fill: #e0e0ff !important;
+    stroke: #666 !important;
+}
+
+.messageText {
+    fill: #333 !important;
+    font-size: 14px !important;
+}
+
+.classLabel {
+    fill: #333 !important;
+    font-weight: bold !important;
+}

@@ -1,0 +1,14 @@
+{
+  "recommendations": [
+    "golang.go",
+    "golangci-lint.golangci-lint",
+    "davidanson.vscode-markdownlint",
+    "yzhang.markdown-all-in-one",
+    "redhat.vscode-yaml",
+    "task.vscode-task",
+    "ms-vscode.vscode-json"
+  ],
+  "unwantedRecommendations": [
+    "ms-vscode.go"
+  ]
+}

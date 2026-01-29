@@ -1,0 +1,35 @@
+pr_size_threshold: 99
+
+default_reviewers:
+  - ageha734
+
+num_reviewers: 1
+
+path_reviewers:
+  "test/**":
+    - ageha734
+  ".github/**":
+    - ageha734
+  "cmd/**":
+    - ageha734
+  "infra/**":
+    - ageha734
+  "usecase/**":
+    - ageha734
+
+label_reviewers:
+  security:
+    - ageha734
+  breaking-change:
+    - ageha734
+
+skip_labels:
+  - "skip-review"
+  - "wip"
+  - "do-not-merge"
+
+skip_draft: true
+
+skip_users:
+  - dependabot[bot]
+  - renovate[bot]

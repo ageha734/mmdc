@@ -1,0 +1,64 @@
+name: "ReviewDog"
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  exec-reviewdog:
+    name: Exec ReviewDog
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Setup Go and Task
+        uses: ./.github/actions/setup-go
+
+      - name: Run golangci-lint with reviewdog
+        uses: reviewdog/action-golangci-lint@f9bba13753278f6a73b27a56a3ffb1bfda90ed71 # v2.8.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          level: warning
+          reporter: github-pr-review
+          filter_mode: added
+          fail_on_error: false
+          golangci_lint_flags: "--timeout=5m"
+
+      - name: Check for Dockerfile
+        id: dockerfile_check
+        run: |
+          if [ -f Dockerfile ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run hadolint with reviewdog
+        if: steps.dockerfile_check.outputs.exists == 'true'
+        uses: reviewdog/action-hadolint@921946a7ebaaf08ac72607bad67209f4e52b5407 # v1.50.5
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          level: warning
+          reporter: github-pr-review
+          filter_mode: added
+          fail_on_error: false
+
+      - name: Run actionlint with reviewdog
+        uses: reviewdog/action-actionlint@e58ee9d111489c31395fbe4857b0be6e7635dbda # v1.70.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          level: warning
+          reporter: github-pr-review
+          filter_mode: added
+          fail_on_error: false
+
+      - name: Run misspell with reviewdog
+        uses: reviewdog/action-misspell@d6429416b12b09b4e2768307d53bef58d172e962 # v1.27.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          level: warning
+          reporter: github-pr-review
+          filter_mode: added
+          fail_on_error: false
+          locale: "US"
